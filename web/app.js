@@ -324,7 +324,7 @@
   /* ---------- regras e discussão ---------- */
   $("regras-txt").textContent = F.regras_texto || "";
   (R.respostas_discussao || []).forEach(function (q) {
-    h("details", "", "<summary>" + esc(q.pergunta) + "</summary><p>" + esc(q.resposta) + "</p>", $("qa"));
+    h("details", "", "<summary>" + esc(q.pergunta) + "</summary>" + (q.resumo ? "<p class=\"rs\">" + esc(q.resumo) + "</p>" : "") + "<p>" + esc(q.resposta) + "</p>", $("qa"));
   });
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", heat);
 })();

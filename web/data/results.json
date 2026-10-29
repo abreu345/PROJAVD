@@ -3017,31 +3017,38 @@
  "respostas_discussao": [
   {
    "pergunta": "Por que o lote é vazamento de dados?",
-   "resposta": "O lote identifica o frasco de uma vacina específica: cada lote pertence a um único fabricante, então a coluna entrega o rótulo quase diretamente. Só para medir (fora do modelo final), uma árvore com lote chegou a 96.8% no teste, contra 82.6% sem ele. Na prática o lote só existe depois que a vacina já foi escolhida, então não estaria disponível para prever."
+   "resumo": "Porque o lote já contém a resposta que queremos prever.",
+   "resposta": "Cada lote pertence a um único fabricante, então saber o lote é quase saber a vacina. Para medir isso (fora do modelo final), treinamos uma árvore com a coluna lote: ela chegou a 96,8% no teste, contra 82,6% sem ela. Esses 14,2 pontos percentuais a mais não vêm de aprender padrões, vêm de ver o gabarito. Além disso, na vida real o lote só é conhecido depois que a vacina já foi escolhida e aplicada, então o modelo não poderia usá-lo para prever. Por isso a atividade o proíbe e o resultado honesto é o de 82,6%."
   },
   {
    "pergunta": "O mês é uma boa representação da data?",
-   "resposta": "É razoável, mas não a melhor. Com a árvore rasa da aula (profundidade 4), trocar mês por dia do ano (dias desde 01/01/2022) mudou a CV de 65.4% para 66.9%: o mês só dá 12 cortes grosseiros, enquanto o dia do ano permite cortes finos como 'depois do dia X', já que cada vacina/público entrou em campanha em momentos distintos de 2022. Na árvore final (mais profunda) a diferença encolhe: CV de 82.7% com mês contra 83.0% com dia do ano, porque uma árvore profunda recompõe a data com vários cortes."
+   "resumo": "Não é a melhor: o dia do ano é mais preciso, mas numa árvore profunda a diferença é pequena.",
+   "resposta": "O mês só permite 12 cortes grosseiros. O dia do ano (dias desde 01/01/2022) permite cortes finos como 'depois do dia X', e isso importa porque cada vacina e cada público entraram na campanha em momentos diferentes. Com a árvore rasa da aula (profundidade 4), trocar mês por dia do ano subiu a CV de 65,4% para 66,9%. Na árvore final a diferença quase some: CV de 82,7% com mês contra 83,0% com dia do ano, porque uma árvore profunda reconstrói a data combinando vários cortes de mês. Conclusão: o dia do ano é a melhor escolha, mas só faz grande diferença quando a árvore é rasa."
   },
   {
    "pergunta": "Quais colunas mais ajudaram?",
-   "resposta": "Pela ablação (remover cada grupo e medir a CV no treino): dose (-2.7 pp na CV se removida), idade (-2.6 pp na CV se removida), dia_do_ano (-0.3 pp na CV se removida), dia_da_semana (-0.1 pp na CV se removida). As importâncias da árvore final lideram com idade, dia_do_ano, dose. Idade e dose separam o público pediátrico dos adultos; a data separa campanhas; grupo/categoria descrevem o perfil da pessoa vacinada (público-alvo), informação conhecida antes da escolha da vacina, por isso não são vazamento. Sem o bloco de perfil a CV fica em 82.8%."
+   "resumo": "Idade, dose e a data (dia do ano).",
+   "resposta": "Na árvore final, as colunas mais importantes são idade (45,5%), dia_do_ano (36,6%), dose (8,4%). Pela ablação (remover cada grupo e medir a CV no treino), as maiores quedas ocorrem sem dose (−2,7 p.p.), idade (−2,6 p.p.), dia_do_ano (−0,3 p.p.). Idade e dose separam o público pediátrico do adulto e a primeira dose do reforço; a data separa as fases da campanha. Atenção: importância alta não é o mesmo que queda grande ao remover, porque colunas parecidas se substituem entre si. O bloco de perfil (grupo, categoria, unidade de saúde etc.) ajudou muito pouco: sem ele a CV é 82,8%, contra 83,0% com ele. Essas colunas são conhecidas antes da vacina ser escolhida, por isso não são vazamento."
   },
   {
    "pergunta": "Onde a matriz de confusão mostra confusão?",
-   "resposta": "As maiores confusões no teste: 169 casos de 'COMIRNATY (PFIZER)' previstos como 'CHADOX1NCOV-19 - OXFORD/ASTRAZENECA (FIOCRUZ)'; 163 casos de 'CORONAVAC - SINOVAC (BUTANTAN)' previstos como 'COMIRNATY (PFIZER)'. A classe com pior recall é 'CORONAVAC - SINOVAC (BUTANTAN) PEDIÁTRICA' (54.2%). As variantes do mesmo fabricante (adulto vs pediátrica) e vacinas aplicadas ao mesmo público e período se misturam, porque as features descrevem a pessoa e a data, não o frasco."
+   "resumo": "Principalmente entre vacinas aplicadas ao mesmo público e na mesma época, e nas Coronavac.",
+   "resposta": "As duas maiores confusões no teste são: 169 casos de 'COMIRNATY (PFIZER)' previstos como 'CHADOX1NCOV-19 - OXFORD/ASTRAZENECA (FIOCRUZ)'; 163 casos de 'CORONAVAC - SINOVAC (BUTANTAN)' previstos como 'COMIRNATY (PFIZER)'. Os piores recalls são 'CORONAVAC - SINOVAC (BUTANTAN) PEDIÁTRICA' (54,2%) e 'CORONAVAC - SINOVAC (BUTANTAN)' (60,8%), ou seja, o modelo erra 45,8% e 39,2% dessas pessoas. A causa é que as colunas descrevem a pessoa e a data, não o frasco: quando duas vacinas foram dadas à mesma faixa de idade e no mesmo período, a árvore não tem como separá-las e escolhe a mais frequente. Já as classes mais fáceis de separar são 'COMIRNATY (PFIZER) - PEDIÁTRICA' (93,5%) e 'JANSSEN COVID-19 VACCINE (JOHNSON & JOHNSON)' (90,1%)."
   },
   {
    "pergunta": "A acurácia sozinha engana?",
-   "resposta": "Sim. O dummy que sempre prevê 'COMIRNATY (PFIZER)' já acerta 35.5% só pelo desbalanceamento das classes. A acurácia final de 82.6% deve ser lida em relação a essa linha de base e junto de precisão/recall por classe: classes menores podem ter recall baixo e o total esconder isso."
+   "resumo": "Sim: ela só faz sentido comparada a uma linha de base e olhando cada classe.",
+   "resposta": "Um modelo que sempre responde 'COMIRNATY (PFIZER)' já acerta 35,5% só porque essa é a vacina mais comum. Então os 82,6% da árvore devem ser lidos como um ganho de 47,1 pontos sobre essa régua. Além disso, a média esconde diferenças entre as classes: o recall vai de 54,2% (pior classe) a 93,5% (melhor classe). Por isso também olhamos precisão, recall, F1 e a matriz de confusão."
   },
   {
    "pergunta": "O que é overfitting aqui?",
-   "resposta": "Com profundidade=None a árvore chega a 5966 folhas (profundidade 41) e acerta 97.7% no treino, mas 77.5% no teste: decorou o treino. Os hiperparâmetros do modelo final (escolhidos por validação cruzada só no treino) deixaram treino em 83.9% e teste em 82.6%, uma diferença bem menor."
+   "resumo": "A árvore decorar o treino em vez de aprender o padrão, e falhar em casos novos.",
+   "resposta": "Sem limite de profundidade nem poda, a árvore cresceu até 5966 folhas (profundidade 41): acertou 97,7% no treino, mas só 77,5% no teste, uma diferença de 20,2 pontos. Para evitar isso, escolhemos os hiperparâmetros (incluindo a poda ccp_alpha) por validação cruzada usando só o treino. A árvore final tem 192 folhas e fica com 83,9% no treino e 82,6% no teste: a diferença caiu para 1,3 ponto, então não há overfitting relevante."
   },
   {
    "pergunta": "A meta de 80% foi atingida e como a escolha foi feita?",
-   "resposta": "Acurácia no teste: 82.6% (meta 80%). A tentativa foi escolhida pela maior média de CV (5-fold estratificado) no conjunto de treino; o teste foi apenas reportado, nunca usado para tunar. Sem usar lote."
+   "resumo": "Sim: 82,6% no teste, sem usar o lote.",
+   "resposta": "A tentativa vencedora foi a de maior média de validação cruzada (5-fold estratificado) no conjunto de treino, 83,0%. O conjunto de teste foi usado apenas para reportar o resultado, nunca para escolher ou ajustar o modelo, então os 82,6% são uma estimativa honesta para dados novos. O maior salto veio de aumentar a profundidade da árvore; as colunas extras contribuíram pouco."
   }
  ]
 }

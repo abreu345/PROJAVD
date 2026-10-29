@@ -66,6 +66,7 @@ summary{cursor:pointer;font-weight:500}
 #qa summary::-webkit-details-marker{display:none}
 #qa summary::after{content:"+";color:var(--accent);font-weight:600}
 #qa details[open] summary::after{content:"\2212"}
+#qa p.rs{color:var(--ink);font-weight:600}
 #qa p{margin:.6rem 0 0;color:var(--muted);white-space:pre-line;max-width:70ch}
 footer{border-top:1px solid var(--line);padding:2rem 0;color:var(--muted);font-size:.85rem;margin-top:4rem}
 footer .wrap>div+div{margin-top:.2rem}
