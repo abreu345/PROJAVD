@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classificador de vacinas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <h1>Classificador de vacinas</h1>
+    <p class="sub" id="hero-sub"></p>
+    <div class="stats">
+      <div class="stat main"><div class="v" id="s-acc">--</div><div class="l">Acurácia final<button type="button" class="info" aria-label="Informação" data-info="Percentual de vacinas acertadas no conjunto de teste: dados que o modelo nunca viu durante o treino.">i</button></div><div class="c" id="c-acc">&nbsp;</div></div>
+      <div class="stat"><div class="v" id="s-base">--</div><div class="l">Linha de base<button type="button" class="info" aria-label="Informação" data-info="Acurácia de um &quot;modelo&quot; que sempre responde a vacina mais comum. Qualquer modelo útil precisa superar esse valor.">i</button></div><div class="c" id="c-base">&nbsp;</div></div>
+      <div class="stat"><div class="v" id="s-goal">--</div><div class="l">Meta<button type="button" class="info" aria-label="Informação" data-info="Objetivo da atividade: passar de 80% de acurácia no teste, sem usar a coluna lote.">i</button></div><div class="c" id="c-goal">&nbsp;</div></div>
+    </div>
+    <div class="gauge" id="gauge"></div>
+  </div>
+</header>
+<main class="wrap">
+  <section id="tentativas"><h2>Tentativas<button type="button" class="info" aria-label="Informação" data-info="Cada linha é uma versão do modelo, da mais simples à final. A tabela mostra como a acurácia evoluiu a cada mudança.">i</button></h2>
+    <div class="card"><table id="tbl"><thead><tr><th class="n">#<button type="button" class="info" aria-label="Informação" data-info="Ordem da tentativa.">i</button></th><th>Tentativa<button type="button" class="info" aria-label="Informação" data-info="O que mudou em relação à anterior: novas colunas, outra representação da data ou ajuste dos parâmetros da árvore.">i</button></th><th class="r">CV<button type="button" class="info" aria-label="Informação" data-info="Validação cruzada (5 partes) feita só no treino. É a nota usada para escolher a melhor versão, sem olhar o teste.">i</button></th><th class="r">Treino<button type="button" class="info" aria-label="Informação" data-info="Acerto nos dados com que o modelo aprendeu. Se for muito maior que o teste, o modelo decorou (overfitting).">i</button></th><th class="r">Teste<button type="button" class="info" aria-label="Informação" data-info="Acerto em dados novos (20% da base), usado só para reportar o resultado. É a nota que vale.">i</button></th></tr></thead><tbody></tbody></table>
+    <p class="foot-note">Escolha pela CV; o teste só é reportado.</p></div>
+  </section>
+  <section id="arvore"><h2>Árvore<button type="button" class="info" aria-label="Informação" data-info="Cada caixa faz uma pergunta sobre uma coluna. Seguimos &quot;sim&quot; ou &quot;não&quot; até uma folha, que indica a vacina prevista. A cor é a vacina mais comum no grupo; a barra mostra a mistura de vacinas. Didática: só 3 perguntas. Final: o modelo completo. Arraste para mover e use Ctrl + roda para zoom.">i</button></h2>
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Árvore"><button id="t-did" class="on">Didática</button><button id="t-fin">Final</button></div>
+      <button id="b-exp">Expandir</button><button id="b-col">Recolher</button><button id="b-fit">Ajustar</button>
+      <span class="muted" id="tree-info"></span>
+    </div>
+    <div class="card treebox"><svg id="tree" role="img" aria-label="Árvore de decisão"></svg></div>
+    <div class="legend" id="legend"></div>
+    <div class="detail" id="detail"></div>
+  </section>
+  <section id="matriz"><h2>Matriz de confusão<button type="button" class="info" aria-label="Informação" data-info="Linhas: vacina real. Colunas: vacina prevista. A diagonal são os acertos; fora dela, as confusões. % mostra a proporção dentro de cada linha.">i</button></h2>
+    <div class="toolbar"><div class="seg"><button id="m-abs" class="on">Contagem</button><button id="m-row">%</button></div></div>
+    <div class="card scroll"><svg id="heat" role="img" aria-label="Matriz de confusão"></svg></div>
+  </section>
+  <section class="two">
+    <div id="metricas"><h2>Por classe<button type="button" class="info" aria-label="Informação" data-info="Desempenho do modelo em cada vacina separadamente.">i</button></h2><div class="card"><table id="mt"><thead><tr><th>Classe</th><th class="r">Prec.<button type="button" class="info" aria-label="Informação" data-info="Precisão: quando o modelo diz esta vacina, quantas vezes ele acerta.">i</button></th><th class="r">Recall<button type="button" class="info" aria-label="Informação" data-info="Das pessoas que tomaram esta vacina, quantas o modelo encontrou.">i</button></th><th class="r">F1<button type="button" class="info" aria-label="Informação" data-info="Média entre precisão e recall. Quanto mais perto de 100%, melhor.">i</button></th></tr></thead><tbody></tbody></table></div></div>
+    <div id="imp"><h2>Importâncias<button type="button" class="info" aria-label="Informação" data-info="Colunas que mais ajudaram a árvore a separar as vacinas. A data pesa muito porque cada vacina foi aplicada em períodos diferentes da campanha.">i</button></h2><div class="card"><div id="imps"></div></div></div>
+  </section>
+  <section id="regras"><details class="card"><summary>Regras em texto</summary><pre id="regras-txt"></pre></details></section>
+  <section id="discussao"><h2>Discussão<button type="button" class="info" aria-label="Informação" data-info="Perguntas da atividade, respondidas com os resultados deste modelo.">i</button></h2><div id="qa"></div></section>
+</main>
+<footer><div class="wrap"><div>CESAR School &middot; AVD &middot; Aula 10</div><div>Gabriel Abreu Souza, Rafael Lyra Costa, Mateus José Galvão de Melo Guimarães</div></div></footer>
+<div id="tip" class="tip" hidden></div>
+<script src="data/results.js"></script>
+<script src="app.js"></script>
+<script src="info.js"></script>
+</body>
+</html>
