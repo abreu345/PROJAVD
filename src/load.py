@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pymongo import MongoClient
 from src import config
 from sqlalchemy import create_engine
@@ -20,3 +20,14 @@ class Load:
         engine = create_engine(config.NEON_URL)
         df.to_sql(config.TABELA_SILVER, engine, if_exists="replace", index=False)
         print(f"[load] {len(df)} linhas gravadas na tabela '{config.TABELA_SILVER}'")
+
+    def salvar_gold_previsoes(self, df):
+        """Acrescenta previsões à gold, sem substituir execuções anteriores."""
+        engine = create_engine(config.NEON_URL)
+        saida = df.copy()
+        if "data_previsao" not in saida:
+            saida["data_previsao"] = datetime.now(timezone.utc)
+        saida.to_sql("gold_previsoes", engine, if_exists="append", index=False)
+        engine.dispose()
+        print(f"[load] {len(saida)} previsões acrescentadas em gold_previsoes")
+        return saida

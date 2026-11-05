@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from pathlib import Path
+import joblib
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -120,7 +122,54 @@ class Classificador:
     def definir_final(self, modelo, grupos):
         self.modelo, self.grupos_final = modelo, grupos
         self.Xtr_final, self.Xte_final = self.xy(grupos)
+        self.colunas_final = list(self.Xtr_final.columns)
         self.pred = modelo.predict(self.Xte_final)
+
+    def salvar(self, caminho="modelos/classificador_vacina.joblib"):
+        """Salva o classificador e todo o preparo necessário para inferência."""
+        Path(caminho).parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump({"modelo": self.modelo, "features": self.features,
+                     "grupos": self.grupos_final,
+                     "colunas": list(self.Xtr_final.columns)}, caminho)
+        print(f"[model] modelo salvo em {caminho}")
+        return caminho
+
+    @staticmethod
+    def carregar(caminho="modelos/classificador_vacina.joblib"):
+        """Carrega sem treinar novamente."""
+        return joblib.load(caminho)
+
+    def preparar_entrada(self, df):
+        """Reproduz o preparo das features treinadas para perfis novos."""
+        df = df.copy()
+        obrigatorias = ["idade", "dose", "data_vacinacao"]
+        ausentes = set(obrigatorias) - set(df.columns)
+        if ausentes:
+            raise ValueError(f"Colunas obrigatórias ausentes: {sorted(ausentes)}")
+        df["data_vacinacao"] = pd.to_datetime(df["data_vacinacao"], errors="coerce")
+        df["idade"] = pd.to_numeric(df["idade"], errors="coerce")
+        df["dose"] = pd.to_numeric(df["dose"], errors="coerce")
+        if df[obrigatorias].isna().any().any():
+            raise ValueError("idade, dose e data_vacinacao precisam ser válidas")
+        for col in self.features.categoricas:
+            if col not in df:
+                df[col] = "SEM INFORMACAO"
+        X = self.features.transformar(df)
+        return Features.selecionar(X, self.grupos_final).reindex(columns=self.colunas_final, fill_value=0)
+
+    def carregar_final(self, artefato):
+        self.modelo = artefato["modelo"]
+        self.features = artefato["features"]
+        self.grupos_final = artefato["grupos"]
+        self.colunas_final = artefato["colunas"]
+        return self
+
+    def prever(self, df):
+        X = self.preparar_entrada(df)
+        probabilidades = self.modelo.predict_proba(X)
+        indices = probabilidades.argmax(axis=1)
+        return pd.DataFrame({"vacina_prevista": self.modelo.classes_[indices],
+                             "confianca": probabilidades.max(axis=1)}, index=df.index)
 
     def matriz_confusao(self, caminho="matriz_confusao.png"):
         classes = [str(c) for c in self.modelo.classes_]
