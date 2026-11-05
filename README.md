@@ -11,9 +11,8 @@ A partir do perfil de quem foi vacinado, uma **árvore de decisão** prevê **qu
 
 | Nome | Email |
 |------|-------|
-| Gabriel Abreu Souza | [gasb2@cesar.school](mailto:gasb2@cesar.school) |
+| Gabriel Abreu de Sousa Barbosa | [gasb2@cesar.school](mailto:gasb2@cesar.school) |
 | Rafael Lyra Costa | [rlc3@cesar.school](mailto:rlc3@cesar.school) |
-| Mateus José Galvão de Melo Guimarães | [mjgmg@cesar.school](mailto:mjgmg@cesar.school) |
 
 **Disciplina:** Análise e Visualização de Dados (AVD)
 
