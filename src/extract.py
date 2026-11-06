@@ -35,3 +35,10 @@ class Extract:
         engine.dispose()
         print(f"[extract] {len(df)} linhas lidas da silver")
         return df
+
+    def ler_gold(self):
+        engine = create_engine(config.NEON_URL)
+        df = pd.read_sql(f"SELECT * FROM {config.TABELA_GOLD}", engine)
+        engine.dispose()
+        print(f"[extract] {len(df)} previsões lidas da gold")
+        return df

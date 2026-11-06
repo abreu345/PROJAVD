@@ -17,3 +17,4 @@ MONGO_COLECAO = "bronze_vacinados"
 # Silver - NeonDB
 NEON_URL = os.getenv("NEON_URL")
 TABELA_SILVER = "silver_vacinados"
+TABELA_GOLD = "gold_previsoes"

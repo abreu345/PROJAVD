@@ -171,6 +171,11 @@ class Classificador:
         return pd.DataFrame({"vacina_prevista": self.modelo.classes_[indices],
                              "confianca": probabilidades.max(axis=1)}, index=df.index)
 
+    def probabilidades(self, df):
+        """Probabilidade de cada vacina (uma coluna por classe) para perfis novos."""
+        X = self.preparar_entrada(df)
+        return pd.DataFrame(self.modelo.predict_proba(X), columns=self.modelo.classes_, index=df.index)
+
     def matriz_confusao(self, caminho="matriz_confusao.png"):
         classes = [str(c) for c in self.modelo.classes_]
         cm = confusion_matrix(self.y_teste, self.pred, labels=classes)
